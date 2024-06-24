@@ -148,10 +148,10 @@ class VarianceAdaptor(nn.Module):
             x = x + energy_embedding
 
         return (
-            x,
-            pitch_prediction,
-            energy_prediction,
-            log_duration_prediction,
+            x, # bs, max_mel_unit, mel_hidden_feature e.g. 256
+            pitch_prediction, # bs, num_of_phonomes
+            energy_prediction, # bs, num_of_phonomes
+            log_duration_prediction, # bs, num_of_phonomes
             duration_rounded,
             mel_len,
             mel_mask,

@@ -30,35 +30,35 @@ class Dataset(Dataset):
         return len(self.text)
 
     def __getitem__(self, idx):
-        basename = self.basename[idx]
-        speaker = self.speaker[idx]
-        speaker_id = self.speaker_map[speaker]
-        raw_text = self.raw_text[idx]
-        phone = np.array(text_to_sequence(self.text[idx], self.cleaners))
+        basename = self.basename[idx] # e.g. 8_catherine_1_11_12_35
+        speaker = self.speaker[idx] # str
+        speaker_id = self.speaker_map[speaker] # int
+        raw_text = self.raw_text[idx] # str, e.g. it's incredibly important ...
+        phone = np.array(text_to_sequence(self.text[idx], self.cleaners)) # shape of (48,) [109, 133, ...]
         mel_path = os.path.join(
-            self.preprocessed_path,
+            self.preprocessed_path, # path to en_16
             "mel",
             "{}-mel-{}.npy".format(speaker, basename),
         )
-        mel = np.load(mel_path)
+        mel = np.load(mel_path) # (308, 80): (frames, mel_features) 
         pitch_path = os.path.join(
             self.preprocessed_path,
             "pitch",
             "{}-pitch-{}.npy".format(speaker, basename),
         )
-        pitch = np.load(pitch_path)
+        pitch = np.load(pitch_path) # (48, ), same as number of phonemes
         energy_path = os.path.join(
             self.preprocessed_path,
             "energy",
             "{}-energy-{}.npy".format(speaker, basename),
         )
-        energy = np.load(energy_path)
+        energy = np.load(energy_path) # (48, ), same as number of phonemes
         duration_path = os.path.join(
             self.preprocessed_path,
             "duration",
             "{}-duration-{}.npy".format(speaker, basename),
         )
-        duration = np.load(duration_path)
+        duration = np.load(duration_path) # (48, ), same as number of phonemes, sum(duration) = 308
 
         sample = {
             "id": basename,
@@ -105,23 +105,23 @@ class Dataset(Dataset):
         speakers = np.array(speakers)
         texts = pad_1D(texts)
         mels = pad_2D(mels)
-        pitches = pad_1D(pitches)
+        pitches = pad_1D(pitches) # (bs, max_num_phonomes_in_batch)
         energies = pad_1D(energies)
-        durations = pad_1D(durations)
+        durations = pad_1D(durations) # list to padded array
 
         return (
             ids,
             raw_texts,
-            speakers,
-            texts,
-            text_lens,
-            max(text_lens),
-            mels,
-            mel_lens,
-            max(mel_lens),
-            pitches,
-            energies,
-            durations,
+            speakers, # (64,)
+            texts, # (64, 158)
+            text_lens, # (64,)
+            max(text_lens), # 158
+            mels, # (64, 1298, 80)
+            mel_lens, # (64,)
+            max(mel_lens), # 1298
+            pitches, # (64, 158)
+            energies, # (64, 158)
+            durations, # (64, 158)
         )
 
     def collate_fn(self, data):

@@ -1,0 +1,23 @@
+path:
+  ckpt_path: "./output/ckpt/en_16"
+  log_path: "./output/log/en_16"
+  result_path: "./output/result/en_16"
+optimizer:
+  batch_size: 64
+  betas: [0.9, 0.98]
+  eps: 0.000000001
+  weight_decay: 0.0
+  grad_clip_thresh: 1.0
+  grad_acc_step: 1
+  warm_up_step: 4000
+  anneal_steps: [300000, 400000, 500000]
+  anneal_rate: 0.3
+step:
+  total_step: 300000
+  log_step: 100
+  synth_step: 1000
+  val_step: 1000
+  save_step: 100000
+
+
+# python3 synthesize.py --source preprocessed_data/en_16/val.txt --restore_step 100000 --mode batch -p config/en_16_config/preprocess.yaml -m config/en_16_config/model.yaml -t config/en_16_config/train.yaml

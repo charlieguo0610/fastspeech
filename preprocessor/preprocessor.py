@@ -66,7 +66,7 @@ class Preprocessor:
         speakers = {}
         for i, speaker in enumerate(tqdm(os.listdir(self.in_dir))):
             speakers[speaker] = i
-            for wav_name in os.listdir(os.path.join(self.in_dir, speaker)):
+            for wav_name in tqdm(os.listdir(os.path.join(self.in_dir, speaker)), desc='processing data for each speaker'):
                 if ".wav" not in wav_name:
                     continue
 
@@ -170,6 +170,7 @@ class Preprocessor:
 
         # Read and trim wav files
         wav, _ = librosa.load(wav_path)
+        # hop_length = self.sampling_rate / 30.0
         wav = wav[
             int(self.sampling_rate * start) : int(self.sampling_rate * end)
         ].astype(np.float32)

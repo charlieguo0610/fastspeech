@@ -42,26 +42,27 @@ class FastSpeech2(nn.Module):
 
     def forward(
         self,
-        speakers,
-        texts,
-        src_lens,
-        max_src_len,
-        mels=None,
-        mel_lens=None,
-        max_mel_len=None,
-        p_targets=None,
-        e_targets=None,
-        d_targets=None,
+        speakers, # bs, int rep speaker id
+        texts, # bs, num_phonemes (48)
+        src_lens, # bs,
+        max_src_len, # 48, num of phonemes
+        mels=None, # bs, max_mel_len, mel_features
+        mel_lens=None, # bs=64, each rep max mel length
+        max_mel_len=None, # 1203
+        p_targets=None, # pitch gt, (64, 48), bs, num of phonemes
+        e_targets=None, # energy gt, (64, 48), bs, num of phonemes
+        d_targets=None, # duration gt, (64, 48), bs, num of phonemes
         p_control=1.0,
         e_control=1.0,
         d_control=1.0,
     ):
-        src_masks = get_mask_from_lengths(src_lens, max_src_len)
+        
+        src_masks = get_mask_from_lengths(src_lens, max_src_len) # (64, 48) # do padding based on max length in the current batch
         mel_masks = (
             get_mask_from_lengths(mel_lens, max_mel_len)
             if mel_lens is not None
             else None
-        )
+        ) # (64, 1050)
 
         output = self.encoder(texts, src_masks)
 
@@ -71,7 +72,7 @@ class FastSpeech2(nn.Module):
             )
 
         (
-            output,
+            output_var, # (64, 1050, 256)
             p_predictions,
             e_predictions,
             log_d_predictions,
@@ -91,12 +92,13 @@ class FastSpeech2(nn.Module):
             d_control,
         )
 
-        output, mel_masks = self.decoder(output, mel_masks)
+        output, mel_masks = self.decoder(output_var, mel_masks)
         output = self.mel_linear(output)
 
         postnet_output = self.postnet(output) + output
 
         return (
+            output_var,
             output,
             postnet_output,
             p_predictions,

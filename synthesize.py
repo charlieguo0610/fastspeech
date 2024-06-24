@@ -16,6 +16,7 @@ from text import text_to_sequence
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+import os
 
 def read_lexicon(lex_path):
     lexicon = {}
@@ -88,6 +89,8 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
     preprocess_config, model_config, train_config = configs
     pitch_control, energy_control, duration_control = control_values
 
+    # mkdir for train_config["path"]["result_path"]
+    os.makedirs(train_config["path"]["result_path"], exist_ok=True)
     for batch in batchs:
         batch = to_device(batch, device)
         with torch.no_grad():
